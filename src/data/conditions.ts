@@ -1,5 +1,6 @@
 import { ConditionInfo } from '../types';
 
+
 export const DND_CONDITIONS: ConditionInfo[] = [
   {
     id: 'concentration',
@@ -130,3 +131,4 @@ export const DND_CONDITIONS: ConditionInfo[] = [
     description: 'Накапливающиеся штрафы: 1: помеха на проверки; 2: скорость 1/2; 3: помеха на атаки/спасброски; 4: хиты 1/2; 5: скорость 0; 6: смерть.'
   }
 ];
+

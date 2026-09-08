@@ -118,3 +118,4 @@ export interface ConditionInfo {
   borderColor: string;
   description: string;
 }
+
