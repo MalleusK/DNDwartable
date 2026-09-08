@@ -252,10 +252,26 @@ export const SessionNotes: React.FC<SessionNotesProps> = ({ currentCampaign }) =
                 <button
                   onClick={() => insertMarkdown('> ')}
                   className="p-1 rounded hover:bg-dm-card text-dm-textMuted hover:text-dm-text"
-                  title="Цитата (> текст)"
+                  title="Обычная цитата (> текст)"
                 >
                   <Quote className="w-3.5 h-3.5" />
                 </button>
+                <div className="w-px h-3.5 bg-dm-border mx-0.5" />
+                <button
+                  onClick={() => insertMarkdown('>> ')}
+                  className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 border border-amber-500/30 text-[11px] font-medium transition-colors"
+                  title="Блок для зачитывания игрокам (золотистый): >> текст"
+                >
+                  <span>🗣️ Зачитать</span>
+                </button>
+                <button
+                  onClick={() => insertMarkdown('>! ')}
+                  className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-300 hover:bg-purple-500/25 border border-purple-500/30 text-[11px] font-medium transition-colors"
+                  title="Секретная информация для мастера (фиолетовый): >! текст"
+                >
+                  <span>🤫 Секрет</span>
+                </button>
+                <div className="w-px h-3.5 bg-dm-border mx-0.5" />
                 <button
                   onClick={() => insertMarkdown('| Колонка 1 | Колонка 2 |\n|---|---|\n| Данные 1 | Данные 2 |\n')}
                   className="p-1 rounded hover:bg-dm-card text-dm-textMuted hover:text-dm-text"
