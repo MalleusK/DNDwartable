@@ -33,10 +33,8 @@ export class DMCommandDeckDB extends Dexie {
 export const db = new DMCommandDeckDB();
 
 export async function initDb() {
-  const spellsCount = await db.spells.count();
-  if (spellsCount === 0) {
-    await db.spells.bulkAdd(mockSpells);
-  }
+  // Всегда обновляем и дополняем базу заклинаний новыми спеллами
+  await db.spells.bulkPut(mockSpells);
 
   const monstersCount = await db.monsters.count();
   if (monstersCount === 0) {

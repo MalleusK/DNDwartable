@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.js";
 
 @layer base {
   * {
@@ -39,4 +38,121 @@
 
 .glow-danger {
   box-shadow: 0 0 12px rgba(237, 66, 69, 0.35);
+}
+
+/* Markdown typography styling */
+.markdown-content h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: #f2f3f5;
+  border-bottom: 1px solid #2a2f3a;
+  padding-bottom: 0.25rem;
+}
+
+.markdown-content h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 0.85rem;
+  margin-bottom: 0.4rem;
+  color: #5865f2;
+}
+
+.markdown-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.35rem;
+  color: #3ba55d;
+}
+
+.markdown-content p {
+  margin-bottom: 0.65rem;
+  line-height: 1.6;
+}
+
+.markdown-content ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 0.65rem;
+}
+
+.markdown-content ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin-bottom: 0.65rem;
+}
+
+.markdown-content li {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-content strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.markdown-content em {
+  font-style: italic;
+  color: #c7cbd4;
+}
+
+.markdown-content blockquote {
+  border-left: 3px solid #5865f2;
+  padding-left: 0.75rem;
+  margin: 0.65rem 0;
+  color: #949ba4;
+  background: rgba(88, 101, 242, 0.05);
+  border-radius: 0 4px 4px 0;
+}
+
+.markdown-content code {
+  background: #14171c;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85em;
+  color: #eb459e;
+  border: 1px solid #2a2f3a;
+}
+
+.markdown-content pre {
+  background: #14171c;
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: 0.75rem;
+  border: 1px solid #2a2f3a;
+}
+
+.markdown-content pre code {
+  background: transparent;
+  padding: 0;
+  border: none;
+  color: #f2f3f5;
+}
+
+.markdown-content hr {
+  border: none;
+  border-top: 1px solid #2a2f3a;
+  margin: 1rem 0;
+}
+
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75rem;
+}
+
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid #2a2f3a;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+}
+
+.markdown-content th {
+  background: #1e2229;
+  font-weight: 700;
 }

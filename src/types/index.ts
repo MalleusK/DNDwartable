@@ -24,6 +24,10 @@ export interface Combatant {
   notes?: string;
   conditions: string[]; // ['blinded', 'concentration', ...]
   spellIds: string[]; // id спеллов
+  monsterId?: string;
+  stats?: MonsterStats;
+  actions?: MonsterAction[];
+  traits?: MonsterTrait[];
 }
 
 export interface MonsterStats {

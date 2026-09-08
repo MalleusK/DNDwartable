@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Combatant, CombatantType } from '../../types';
-
 import { db } from '../../db/db';
 import { rollD20 } from '../../utils/dice';
 
@@ -16,12 +15,13 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({ campaignId
   const [hp, setHp] = useState<number | ''>('');
   const [ac, setAc] = useState<number | ''>('');
   const [initiative, setInitiative] = useState<number | ''>('');
+  const [notes, setNotes] = useState('');
   
   const handleSave = async () => {
     if (!name.trim()) return;
 
-    const finalHp = Number(hp) || 10;
-    const finalAc = Number(ac) || 10;
+    const finalHp = Math.max(1, Number(hp) || 10);
+    const finalAc = Math.max(0, Number(ac) || 10);
     const finalInit = initiative !== '' ? Number(initiative) : rollD20().total;
 
     const newCombatant: Combatant = {
@@ -37,6 +37,7 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({ campaignId
       initiative: finalInit,
       conditions: [],
       spellIds: [],
+      notes: notes.trim() || undefined,
     };
 
     await db.combatants.add(newCombatant);
@@ -44,8 +45,8 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({ campaignId
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-dm-panel border border-dm-border rounded-xl shadow-2xl w-[400px] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="bg-dm-panel border border-dm-border rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col">
         <div className="flex items-center justify-between px-4 py-3 border-b border-dm-border bg-dm-panelAlt">
           <h2 className="text-sm font-bold text-dm-text">Быстрое добавление бойца</h2>
           <button onClick={onClose} className="text-dm-textMuted hover:text-dm-text">
@@ -53,15 +54,15 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({ campaignId
           </button>
         </div>
         
-        <div className="p-4 flex flex-col gap-4">
+        <div className="p-4 flex flex-col gap-3">
           <div>
-            <label className="block text-xs text-dm-textMuted mb-1">Имя</label>
+            <label className="block text-xs text-dm-textMuted mb-1 font-medium">Имя бойца</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-dm-bg border border-dm-border rounded-md px-3 py-2 text-sm text-dm-text focus:outline-none focus:border-dm-accent"
-              placeholder="Имя бойца..."
+              placeholder="напр. Гоблин-вожак, Лира..."
               autoFocus
             />
           </div>
@@ -72,9 +73,9 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({ campaignId
                 type="radio" 
                 checked={type === 'monster'} 
                 onChange={() => setType('monster')}
-                className="accent-dm-accent"
+                className="accent-dm-danger"
               />
-              <span className="text-sm text-dm-text">Монстр / NPC</span>
+              <span className="text-sm text-dm-text">Монстр / Враг</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input 
@@ -83,41 +84,65 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({ campaignId
                 onChange={() => setType('player')}
                 className="accent-dm-accent"
               />
-              <span className="text-sm text-dm-text">Игрок</span>
+              <span className="text-sm text-dm-text">Игрок / Союзник</span>
             </label>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs text-dm-textMuted mb-1">Макс. ХП</label>
+              <label className="block text-xs text-dm-textMuted mb-1 font-medium">Макс. ХП</label>
               <input
                 type="number"
+                min="1"
                 value={hp}
-                onChange={(e) => setHp(parseInt(e.target.value) || '')}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  setHp(isNaN(val) ? '' : Math.max(1, val));
+                }}
                 className="w-full bg-dm-bg border border-dm-border rounded-md px-3 py-2 text-sm text-dm-text focus:outline-none focus:border-dm-accent"
                 placeholder="10"
               />
             </div>
             <div>
-              <label className="block text-xs text-dm-textMuted mb-1">КД (AC)</label>
+              <label className="block text-xs text-dm-textMuted mb-1 font-medium">КД (AC)</label>
               <input
                 type="number"
+                min="0"
                 value={ac}
-                onChange={(e) => setAc(parseInt(e.target.value) || '')}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  setAc(isNaN(val) ? '' : Math.max(0, val));
+                }}
                 className="w-full bg-dm-bg border border-dm-border rounded-md px-3 py-2 text-sm text-dm-text focus:outline-none focus:border-dm-accent"
                 placeholder="10"
               />
             </div>
             <div>
-              <label className="block text-xs text-dm-textMuted mb-1">Инициатива</label>
+              <label className="block text-xs text-dm-textMuted mb-1 font-medium">Инициатива</label>
               <input
                 type="number"
                 value={initiative}
-                onChange={(e) => setInitiative(parseInt(e.target.value))}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  setInitiative(isNaN(val) ? '' : val);
+                }}
                 className="w-full bg-dm-bg border border-dm-border rounded-md px-3 py-2 text-sm text-dm-text focus:outline-none focus:border-dm-accent"
                 placeholder="Авто (d20)"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-dm-textMuted mb-1 font-medium">
+              Заметки мастера <span className="text-[10px] text-dm-textSubtle">(необязательно)</span>
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Спасброски, слабости, концентрация, особенности..."
+              rows={2}
+              className="w-full bg-dm-bg border border-dm-border rounded-md px-3 py-1.5 text-xs text-dm-text focus:outline-none focus:border-dm-accent resize-none"
+            />
           </div>
         </div>
 
@@ -140,4 +165,3 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({ campaignId
     </div>
   );
 };
-

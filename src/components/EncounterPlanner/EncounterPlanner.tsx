@@ -8,9 +8,10 @@ import { rollD20 } from '../../utils/dice';
 
 interface EncounterPlannerProps {
   currentCampaign: Campaign | null;
+  onLaunchEncounter?: () => void;
 }
 
-export const EncounterPlanner: React.FC<EncounterPlannerProps> = ({ currentCampaign }) => {
+export const EncounterPlanner: React.FC<EncounterPlannerProps> = ({ currentCampaign, onLaunchEncounter }) => {
   const [newEncounterName, setNewEncounterName] = useState('');
   const [selectedEncounterId, setSelectedEncounterId] = useState<string | null>(null);
 
@@ -124,14 +125,19 @@ export const EncounterPlanner: React.FC<EncounterPlannerProps> = ({ currentCampa
             initiative: init,
             conditions: [],
             spellIds: monster.spells || [],
+            monsterId: monster.id,
+            stats: monster.stats,
+            actions: monster.actions,
+            traits: monster.traits,
           });
         }
         nameCounts[monster.name] = baseNameCount;
       }
 
       await db.combatants.bulkAdd(newCombatants);
-      // Возвращаемся в активный бой (переключение вкладок делается на уровне родителя, здесь просто алерт или можно прокинуть callback)
-      alert(`В бой добавлено ${newCombatants.length} существ!`);
+      if (onLaunchEncounter) {
+        onLaunchEncounter();
+      }
     }
   };
 

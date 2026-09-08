@@ -10,6 +10,7 @@ import { SpellsReference } from './components/Spells/SpellsReference';
 import { Bestiary } from './components/Bestiary/Bestiary';
 import { SessionNotes } from './components/Notes/SessionNotes';
 import { SpellModal } from './components/Spells/SpellModal';
+import { DiceRollToast } from './components/DiceRoller/DiceRollToast';
 
 function App() {
   const [activeLeftTab, setActiveLeftTab] = useState<'combat' | 'planner'>('combat');
@@ -69,10 +70,13 @@ function App() {
             </div>
             <div className="flex-1 overflow-hidden p-4">
               {activeLeftTab === 'combat' ? (
-                <CombatTracker currentCampaign={currentCampaign} onOpenSpell={handleOpenSpell} />
-              ) : (
-                <EncounterPlanner currentCampaign={currentCampaign} />
-              )}
+                 <CombatTracker currentCampaign={currentCampaign} onOpenSpell={handleOpenSpell} />
+               ) : (
+                 <EncounterPlanner 
+                   currentCampaign={currentCampaign} 
+                   onLaunchEncounter={() => setActiveLeftTab('combat')} 
+                 />
+               )}
             </div>
           </div>
 
@@ -107,10 +111,11 @@ function App() {
         </SplitView>
       </div>
 
-      {/* Global Modals */}
+      {/* Global Modals & Notifications */}
       {openedSpell && (
         <SpellModal spell={openedSpell} onClose={() => setOpenedSpellId(null)} />
       )}
+      <DiceRollToast />
     </div>
   );
 }
