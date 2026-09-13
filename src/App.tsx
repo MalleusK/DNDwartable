@@ -53,7 +53,7 @@ function App() {
       <div className="flex-1 overflow-hidden">
         <SplitView>
           {/* Left Panel */}
-          <div className="h-full flex flex-col bg-dm-bg">
+          <div className="h-full flex flex-col bg-dm-bg min-h-0">
             <div className="flex border-b border-dm-border shrink-0">
               <button 
                 onClick={() => setActiveLeftTab('combat')}
@@ -68,7 +68,7 @@ function App() {
                 Планировщик
               </button>
             </div>
-            <div className="flex-1 overflow-hidden p-4">
+            <div className="flex-1 min-h-0 overflow-hidden p-4">
               {activeLeftTab === 'combat' ? (
                  <CombatTracker currentCampaign={currentCampaign} onOpenSpell={handleOpenSpell} />
                ) : (

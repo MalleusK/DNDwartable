@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 import { Combatant, CombatantType } from '../../types';
 import { db } from '../../db/db';
 import { rollD20 } from '../../utils/dice';
@@ -7,9 +7,10 @@ import { rollD20 } from '../../utils/dice';
 interface AddCombatantModalProps {
   campaignId: string;
   onClose: () => void;
+  onOpenLSS?: () => void;
 }
 
-export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({ campaignId, onClose }) => {
+export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({ campaignId, onClose, onOpenLSS }) => {
   const [name, setName] = useState('');
   const [type, setType] = useState<CombatantType>('monster');
   const [hp, setHp] = useState<number | ''>('');
@@ -146,20 +147,31 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({ campaignId
           </div>
         </div>
 
-        <div className="p-4 border-t border-dm-border bg-dm-panelAlt flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-md bg-dm-card text-dm-textMuted hover:text-dm-text text-sm font-medium transition-colors"
-          >
-            Отмена
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!name.trim()}
-            className="px-4 py-2 rounded-md bg-dm-accent text-white hover:bg-dm-accentHover disabled:opacity-50 text-sm font-medium transition-colors"
-          >
-            Добавить
-          </button>
+        <div className="p-4 border-t border-dm-border bg-dm-panelAlt flex items-center justify-between gap-2">
+          {onOpenLSS && (
+            <button
+              onClick={onOpenLSS}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/30 hover:bg-purple-500/20 text-xs font-medium transition-colors"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              Импорт из LSS
+            </button>
+          )}
+          <div className="flex gap-2 ml-auto">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-md bg-dm-card text-dm-textMuted hover:text-dm-text text-sm font-medium transition-colors"
+            >
+              Отмена
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={!name.trim()}
+              className="px-4 py-2 rounded-md bg-dm-accent text-white hover:bg-dm-accentHover disabled:opacity-50 text-sm font-medium transition-colors"
+            >
+              Добавить
+            </button>
+          </div>
         </div>
       </div>
     </div>
