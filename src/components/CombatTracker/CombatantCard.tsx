@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Combatant } from '../../types';
 import { db } from '../../db/db';
@@ -25,6 +25,8 @@ interface CombatantCardProps {
 export const CombatantCard: React.FC<CombatantCardProps> = ({ combatant, isActive, onOpenSpell }) => {
   const [hpInput, setHpInput] = useState('');
   const [isEditingHp, setIsEditingHp] = useState(false);
+  const [isEditingInit, setIsEditingInit] = useState(false);
+  const [initInput, setInitInput] = useState(String(combatant.initiative));
   const [showConditions, setShowConditions] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [isEditingNotes, setIsEditingNotes] = useState(false);
@@ -39,6 +41,22 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({ combatant, isActiv
   const [quickCalcValue, setQuickCalcValue] = useState('');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!isEditingInit) {
+      setInitInput(String(combatant.initiative));
+    }
+  }, [combatant.initiative, isEditingInit]);
+
+  const handleInitSubmit = async () => {
+    setIsEditingInit(false);
+    const parsed = parseInt(initInput, 10);
+    if (!isNaN(parsed) && parsed !== combatant.initiative) {
+      await db.combatants.update(combatant.id, { initiative: parsed });
+    } else {
+      setInitInput(String(combatant.initiative));
+    }
+  };
 
   // Load attached spell details
   const attachedSpells = useLiveQuery(
@@ -226,30 +244,66 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({ combatant, isActiv
       } ${isDeadOrUnconscious ? 'opacity-80' : ''}`}
     >
       <div className="flex gap-3 p-3">
-        {/* Avatar Area */}
-        <div 
-          className="relative w-16 h-16 rounded-md bg-dm-card border border-dm-border overflow-hidden shrink-0 group cursor-pointer"
-          onClick={() => fileInputRef.current?.click()}
-          title="Нажмите, чтобы изменить аватар"
-        >
-          {combatant.avatar ? (
-            <img src={combatant.avatar} alt="Avatar" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-dm-textMuted">
-              <ImageIcon className="w-6 h-6 opacity-50" />
-            </div>
-          )}
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-            <Plus className="w-5 h-5 text-white" />
-          </div>
-          <input type="file" accept="image/*" ref={fileInputRef} onChange={handleAvatarUpload} className="hidden" />
-          
+        {/* Avatar Area & Initiative Badge */}
+        <div className="relative w-16 h-16 shrink-0">
           <div 
-            className="absolute -bottom-1 -right-1 bg-dm-panel text-dm-text text-xs font-mono font-bold w-6 h-6 rounded-full border border-dm-border flex items-center justify-center shadow-lg"
-            title={`Инициатива: ${combatant.initiative}`}
+            className="w-full h-full rounded-md bg-dm-card border border-dm-border overflow-hidden group cursor-pointer"
+            onClick={() => fileInputRef.current?.click()}
+            title="Нажмите, чтобы изменить аватар"
           >
-            {combatant.initiative}
+            {combatant.avatar ? (
+              <img src={combatant.avatar} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-dm-textMuted">
+                <ImageIcon className="w-6 h-6 opacity-50" />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+              <Plus className="w-5 h-5 text-white" />
+            </div>
+            <input type="file" accept="image/*" ref={fileInputRef} onChange={handleAvatarUpload} className="hidden" />
           </div>
+
+          {/* Initiative Badge / Inline Editor */}
+          {isEditingInit ? (
+            <div 
+              className="absolute -bottom-2 -right-2 z-20"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <input
+                type="number"
+                value={initInput}
+                onChange={(e) => setInitInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleInitSubmit();
+                  } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    setIsEditingInit(false);
+                    setInitInput(String(combatant.initiative));
+                  }
+                }}
+                onBlur={handleInitSubmit}
+                onFocus={(e) => e.target.select()}
+                className="w-11 h-7 bg-dm-bg border-2 border-dm-accent rounded-md text-center text-xs font-mono font-bold text-dm-text focus:outline-none shadow-xl"
+                autoFocus
+                title="Введите инициативу и нажмите Enter"
+              />
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditingInit(true);
+              }}
+              className="absolute -bottom-1 -right-1 z-10 bg-dm-panel hover:bg-dm-accent hover:text-white text-dm-text text-xs font-mono font-bold px-1.5 min-w-[24px] h-6 rounded-full border border-dm-border hover:border-dm-accent flex items-center justify-center shadow-lg transition-all cursor-pointer"
+              title={`Инициатива: ${combatant.initiative} (нажмите, чтобы изменить)`}
+            >
+              {combatant.initiative}
+            </button>
+          )}
         </div>
 
         {/* Info Area */}
@@ -269,7 +323,7 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({ combatant, isActiv
                 )}
               </div>
 
-              <div className="flex gap-3 text-xs text-dm-textMuted mt-0.5">
+              <div className="flex gap-2.5 items-center text-xs text-dm-textMuted mt-0.5">
                 <span className="flex items-center gap-1" title="Класс Доспеха (AC)">
                   <Shield className="w-3.5 h-3.5 text-dm-text" /> 
                   <strong className="text-dm-text font-mono">{combatant.ac}</strong>
@@ -278,6 +332,19 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({ combatant, isActiv
                   <Eye className="w-3.5 h-3.5 text-dm-text" /> 
                   <strong className="text-dm-text font-mono">{combatant.passivePerception}</strong>
                 </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditingInit(true);
+                  }}
+                  className="flex items-center gap-1 px-1.5 py-0.5 -my-0.5 rounded hover:bg-dm-card border border-transparent hover:border-dm-accent/40 text-dm-text transition-colors cursor-pointer group"
+                  title="Нажмите, чтобы изменить инициативу"
+                >
+                  <span className="text-[10px] text-dm-textMuted group-hover:text-dm-accent">Иниц:</span>
+                  <strong className="text-dm-accent font-mono font-bold">{combatant.initiative}</strong>
+                  <Edit3 className="w-2.5 h-2.5 text-dm-textMuted opacity-50 group-hover:opacity-100 transition-opacity" />
+                </button>
               </div>
             </div>
             

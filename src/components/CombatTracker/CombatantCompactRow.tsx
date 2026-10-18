@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Combatant } from '../../types';
 import { db } from '../../db/db';
 import { Shield, Heart, ChevronDown, Skull, Crown, Dices } from 'lucide-react';
@@ -16,6 +16,24 @@ export const CombatantCompactRow: React.FC<CombatantCompactRowProps> = ({
   onExpand,
 }) => {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isEditingInit, setIsEditingInit] = useState(false);
+  const [initInput, setInitInput] = useState(String(combatant.initiative));
+
+  useEffect(() => {
+    if (!isEditingInit) {
+      setInitInput(String(combatant.initiative));
+    }
+  }, [combatant.initiative, isEditingInit]);
+
+  const handleInitSubmit = async () => {
+    setIsEditingInit(false);
+    const parsed = parseInt(initInput, 10);
+    if (!isNaN(parsed) && parsed !== combatant.initiative) {
+      await db.combatants.update(combatant.id, { initiative: parsed });
+    } else {
+      setInitInput(String(combatant.initiative));
+    }
+  };
 
   const isDead = combatant.currentHp <= 0;
   const hpPct = Math.max(0, Math.min(100, (combatant.currentHp / combatant.maxHp) * 100));
@@ -76,9 +94,43 @@ export const CombatantCompactRow: React.FC<CombatantCompactRowProps> = ({
       `}
     >
       {/* Initiative */}
-      <div className={`w-6 text-center font-bold ${isActive ? 'text-dm-accent' : 'text-dm-textMuted'}`}>
-        {combatant.initiative}
-      </div>
+      {isEditingInit ? (
+        <input
+          type="number"
+          value={initInput}
+          onChange={(e) => setInitInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleInitSubmit();
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              setIsEditingInit(false);
+              setInitInput(String(combatant.initiative));
+            }
+          }}
+          onBlur={handleInitSubmit}
+          onClick={(e) => e.stopPropagation()}
+          onFocus={(e) => e.target.select()}
+          className="w-9 h-6 bg-dm-bg border border-dm-accent rounded text-center text-xs font-mono font-bold text-dm-text focus:outline-none shadow-sm shrink-0"
+          autoFocus
+          title="Введите инициативу и нажмите Enter"
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsEditingInit(true);
+          }}
+          className={`w-7 h-6 rounded flex items-center justify-center font-mono font-bold shrink-0 transition-colors cursor-pointer hover:bg-dm-accent/20 hover:text-dm-accent border border-transparent hover:border-dm-accent/40 ${
+            isActive ? 'text-dm-accent' : 'text-dm-textMuted'
+          }`}
+          title={`Инициатива: ${combatant.initiative} (нажмите, чтобы изменить)`}
+        >
+          {combatant.initiative}
+        </button>
+      )}
 
       {/* Type icon */}
       <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${

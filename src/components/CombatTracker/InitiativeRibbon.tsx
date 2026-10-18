@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Combatant } from '../../types';
+import { db } from '../../db/db';
 import { Skull, Crown } from 'lucide-react';
 
 interface InitiativeRibbonProps {
@@ -15,7 +16,18 @@ export const InitiativeRibbon: React.FC<InitiativeRibbonProps> = ({
   currentRound,
   onScrollTo,
 }) => {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [initInput, setInitInput] = useState<string>('');
+
   if (combatants.length === 0) return null;
+
+  const handleInitSubmit = async (combatantId: string, currentVal: number) => {
+    setEditingId(null);
+    const parsed = parseInt(initInput, 10);
+    if (!isNaN(parsed) && parsed !== currentVal) {
+      await db.combatants.update(combatantId, { initiative: parsed });
+    }
+  };
 
   return (
     <div className="flex items-center gap-1.5 bg-dm-panelAlt border border-dm-border rounded-lg px-2 py-1.5 overflow-x-auto shrink-0 scrollbar-thin">
@@ -29,15 +41,16 @@ export const InitiativeRibbon: React.FC<InitiativeRibbonProps> = ({
         const isDead = c.currentHp <= 0;
         const hpPct = Math.max(0, Math.min(100, (c.currentHp / c.maxHp) * 100));
         const isPlayer = c.type === 'player';
+        const isEditing = editingId === c.id;
 
         return (
-          <button
+          <div
             key={c.id}
             onClick={() => onScrollTo(c.id)}
             title={`${c.name} — ${c.currentHp}/${c.maxHp} ХП, КД ${c.ac}, Иниц. ${c.initiative}`}
             className={`
               relative shrink-0 flex flex-col items-center gap-0.5 rounded-lg px-1.5 py-1 min-w-[48px] max-w-[64px]
-              transition-all cursor-pointer border
+              transition-all cursor-pointer border select-none
               ${isActive
                 ? 'bg-dm-accent/20 border-dm-accent shadow-md shadow-dm-accent/20 scale-105'
                 : isDead
@@ -88,8 +101,42 @@ export const InitiativeRibbon: React.FC<InitiativeRibbonProps> = ({
             </div>
 
             {/* Initiative number */}
-            <span className="text-[8px] text-dm-textSubtle">{c.initiative}</span>
-          </button>
+            {isEditing ? (
+              <input
+                type="number"
+                value={initInput}
+                onChange={(e) => setInitInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleInitSubmit(c.id, c.initiative);
+                  } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    setEditingId(null);
+                  }
+                }}
+                onBlur={() => handleInitSubmit(c.id, c.initiative)}
+                onClick={(e) => e.stopPropagation()}
+                onFocus={(e) => e.target.select()}
+                className="w-8 h-4 bg-dm-bg border border-dm-accent rounded text-center text-[9px] font-mono font-bold text-dm-text focus:outline-none"
+                autoFocus
+                title="Введите инициативу"
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditingId(c.id);
+                  setInitInput(String(c.initiative));
+                }}
+                className="text-[8px] text-dm-textSubtle hover:text-dm-accent hover:bg-dm-card px-1 rounded transition-colors font-mono cursor-pointer"
+                title={`Инициатива: ${c.initiative} (нажмите для изменения)`}
+              >
+                {c.initiative}
+              </button>
+            )}
+          </div>
         );
       })}
     </div>

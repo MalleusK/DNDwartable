@@ -44,8 +44,8 @@ export const CombatTracker: React.FC<CombatTrackerProps> = ({ currentCampaign, o
     localStorage.setItem('dm_combat_view', viewMode);
   }, [viewMode]);
 
-  // Sort by initiative descending
-  const sortedCombatants = [...(combatants || [])].sort((a, b) => b.initiative - a.initiative);
+  // Sort by initiative descending with name tie-breaker
+  const sortedCombatants = [...(combatants || [])].sort((a, b) => (b.initiative - a.initiative) || a.name.localeCompare(b.name));
 
   // Apply filters and search
   const filteredCombatants = sortedCombatants.filter(c => {
